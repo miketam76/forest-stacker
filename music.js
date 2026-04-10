@@ -1,0 +1,271 @@
+// Music.js - 8-bit Chiptune Music Generator using Web Audio API
+
+class MusicManager {
+    constructor() {
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.currentOscillators = [];
+        this.currentGain = null;
+        this.isMuted = false;
+        this.currentTheme = 'woodland';
+        this.isPlaying = false;
+        this.playbackRate = 1.0;
+        this.masterVolume = 0.15; // Lower volume for background music
+
+        // Note frequencies (C4 = 261.63 Hz)
+        this.notes = {
+            C: 261.63, D: 293.66, E: 329.63, F: 349.23, G: 391.99, A: 440, B: 493.88,
+            'C#': 277.18, 'D#': 311.13, 'F#': 369.99, 'G#': 415.30, 'A#': 466.16,
+            // Higher octaves
+            'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99, 'A5': 880, 'B5': 987.77,
+            'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 391.99, 'A4': 440, 'B4': 493.88,
+            // Lower octaves
+            'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61, 'G3': 195.99, 'A3': 220, 'B3': 246.94
+        };
+
+        this.themes = {
+            woodland: {
+                name: '🌲 8-bit Woodland',
+                description: 'Retro chiptune melody'
+            },
+            zen: {
+                name: '🧘 Zen Meditation',
+                description: 'Calming lo-fi chiptune'
+            },
+            celtic: {
+                name: '🎻 Celtic Jig',
+                description: 'Energetic folk tune'
+            },
+            danceParty: {
+                name: '🕺 Dance Party',
+                description: 'High energy celebration'
+            }
+        };
+    }
+
+    // Ensure audio context is running (browser security requirement)
+    ensureAudioContext() {
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume().catch(e => console.log('Audio context resume error:', e));
+        }
+    }
+
+    // Play a single note
+    playNote(frequency, duration, waveType = 'square', volume = 0.1) {
+        if (this.isMuted) return;
+
+        const osc = this.audioContext.createOscillator();
+        const gain = this.audioContext.createGain();
+
+        osc.type = waveType;
+        osc.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+
+        gain.gain.setValueAtTime(volume * this.masterVolume, this.audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(this.audioContext.destination);
+
+        osc.start(this.audioContext.currentTime);
+        osc.stop(this.audioContext.currentTime + duration);
+
+        this.currentOscillators.push(osc);
+        // Clean up completed oscillators
+        setTimeout(() => {
+            this.currentOscillators = this.currentOscillators.filter(o => o !== osc);
+        }, duration * 1000);
+
+        return { osc, gain };
+    }
+
+    // Play a sequence of notes
+    async playSequence(noteSequence, bpm = 120, theme) {
+        const beatDuration = 60 / bpm / this.playbackRate; // In seconds
+
+        for (let note of noteSequence) {
+            if (!this.isPlaying || (theme && this.currentTheme !== theme)) break;
+
+            const freq = this.notes[note.pitch] || note.pitch;
+            const duration = beatDuration * note.duration;
+
+            this.playNote(freq, duration, note.waveType || 'square', note.volume || 0.1);
+
+            // Wait for note to finish
+            await new Promise(resolve => setTimeout(resolve, duration * 1000 / this.playbackRate));
+        }
+    }
+
+    // Woodland theme - cheerful retro chiptune
+    woodlandMelody() {
+        return [
+            { pitch: 'E4', duration: 1, volume: 0.15 },
+            { pitch: 'G4', duration: 1, volume: 0.15 },
+            { pitch: 'E5', duration: 2, volume: 0.12 },
+            { pitch: 'D5', duration: 1, volume: 0.15 },
+            { pitch: 'E5', duration: 1, volume: 0.15 },
+            { pitch: 'G4', duration: 2, volume: 0.12 },
+
+            { pitch: 'C5', duration: 1, volume: 0.15 },
+            { pitch: 'E4', duration: 1, volume: 0.15 },
+            { pitch: 'G4', duration: 2, volume: 0.12 },
+            { pitch: 'E4', duration: 1, volume: 0.15 },
+            { pitch: 'G4', duration: 1, volume: 0.15 },
+            { pitch: 'C5', duration: 2, volume: 0.12 },
+
+            { pitch: 'B4', duration: 1, volume: 0.15 },
+            { pitch: 'G4', duration: 1, volume: 0.15 },
+            { pitch: 'E4', duration: 2, volume: 0.12 },
+            { pitch: 'D4', duration: 2, volume: 0.15 },
+            { pitch: 'E4', duration: 2, volume: 0.15 }
+        ];
+    }
+
+    // Zen theme - calm, meditative
+    zenMelody() {
+        return [
+            { pitch: 'A4', duration: 4, volume: 0.12 },
+            { pitch: 'G4', duration: 2, volume: 0.12 },
+            { pitch: 'E4', duration: 2, volume: 0.12 },
+            { pitch: 'A4', duration: 4, volume: 0.12 },
+
+            { pitch: 'A4', duration: 2, volume: 0.12 },
+            { pitch: 'B4', duration: 2, volume: 0.12 },
+            { pitch: 'C5', duration: 4, volume: 0.12 },
+            { pitch: 'B4', duration: 2, volume: 0.12 },
+            { pitch: 'A4', duration: 2, volume: 0.12 },
+
+            { pitch: 'G4', duration: 4, volume: 0.12 },
+            { pitch: 'E4', duration: 4, volume: 0.12 },
+            { pitch: 'G4', duration: 2, volume: 0.12 },
+            { pitch: 'A4', duration: 2, volume: 0.12 }
+        ];
+    }
+
+    // Celtic theme - upbeat jig
+    celticMelody() {
+        return [
+            { pitch: 'G4', duration: 0.5, volume: 0.15 },
+            { pitch: 'A4', duration: 0.5, volume: 0.15 },
+            { pitch: 'B4', duration: 1, volume: 0.15 },
+            { pitch: 'A4', duration: 0.5, volume: 0.15 },
+            { pitch: 'G4', duration: 0.5, volume: 0.15 },
+            { pitch: 'E4', duration: 1, volume: 0.15 },
+
+            { pitch: 'G4', duration: 0.5, volume: 0.15 },
+            { pitch: 'A4', duration: 0.5, volume: 0.15 },
+            { pitch: 'B4', duration: 0.5, volume: 0.15 },
+            { pitch: 'C5', duration: 0.5, volume: 0.15 },
+            { pitch: 'B4', duration: 1, volume: 0.15 },
+            { pitch: 'A4', duration: 1, volume: 0.15 },
+
+            { pitch: 'B4', duration: 0.5, volume: 0.15 },
+            { pitch: 'C5', duration: 0.5, volume: 0.15 },
+            { pitch: 'D5', duration: 1, volume: 0.15 },
+            { pitch: 'C5', duration: 0.5, volume: 0.15 },
+            { pitch: 'B4', duration: 0.5, volume: 0.15 },
+            { pitch: 'A4', duration: 1, volume: 0.15 },
+
+            { pitch: 'G4', duration: 1, volume: 0.15 },
+            { pitch: 'A4', duration: 1, volume: 0.15 }
+        ];
+    }
+
+    // Dance Party theme - upbeat celebration
+    dancePartyMelody() {
+        return [
+            { pitch: 'C5', duration: 0.5, volume: 0.18 },
+            { pitch: 'E5', duration: 0.5, volume: 0.18 },
+            { pitch: 'G5', duration: 0.5, volume: 0.18 },
+            { pitch: 'E5', duration: 0.5, volume: 0.18 },
+
+            { pitch: 'A5', duration: 1, volume: 0.18 },
+            { pitch: 'G5', duration: 1, volume: 0.18 },
+
+            { pitch: 'F5', duration: 0.5, volume: 0.18 },
+            { pitch: 'E5', duration: 0.5, volume: 0.18 },
+            { pitch: 'D5', duration: 0.5, volume: 0.18 },
+            { pitch: 'E5', duration: 0.5, volume: 0.18 },
+
+            { pitch: 'C5', duration: 2, volume: 0.18 }
+        ];
+    }
+
+    // Stop all current music
+    stopAll() {
+        this.currentOscillators.forEach(osc => {
+            try {
+                osc.stop();
+            } catch (e) { }
+        });
+        this.currentOscillators = [];
+        this.isPlaying = false;
+    }
+
+    // Play a theme with looping
+    async playTheme(theme) {
+        if (!this.themes[theme]) return;
+
+        this.ensureAudioContext(); // Resume audio context if suspended
+        this.stopAll();
+        this.currentTheme = theme;
+        this.isPlaying = true;
+
+        // Get the melody for this theme
+        let melody;
+        const bpm = this.getThemeBPM(theme);
+
+        if (theme === 'woodland') melody = this.woodlandMelody();
+        else if (theme === 'zen') melody = this.zenMelody();
+        else if (theme === 'celtic') melody = this.celticMelody();
+        else if (theme === 'danceParty') melody = this.dancePartyMelody();
+        else return;
+
+        // Loop the melody continuously
+        while (this.isPlaying && this.currentTheme === theme) {
+            await this.playSequence(melody, bpm, theme);
+            if (!this.isPlaying || this.currentTheme !== theme) break;
+        }
+    }
+
+    // Get BPM for each theme
+    getThemeBPM(theme) {
+        const bpms = {
+            woodland: 120,
+            zen: 60,
+            celtic: 140,
+            danceParty: 160
+        };
+        return bpms[theme] || 120;
+    }
+
+    // Toggle mute
+    toggleMute(isMuted) {
+        this.isMuted = isMuted;
+    }
+
+    // Adjust difficulty (speed up music)
+    setDifficulty(level) {
+        this.playbackRate = 1 + ((level - 1) * 0.08);
+        this.playbackRate = Math.min(this.playbackRate, 1.5);
+    }
+
+    // Get all themes
+    getThemes() {
+        return this.themes;
+    }
+
+    // Pause music playback
+    pauseMusic() {
+        this.isPlaying = false;
+    }
+
+    // Resume music playback
+    resumeMusic() {
+        if (!this.isMuted) {
+            this.isPlaying = true;
+            this.playTheme(this.currentTheme); // Restart the theme
+        }
+    }
+}
+
+// Initialize music manager
+const musicManager = new MusicManager();
