@@ -340,6 +340,14 @@ class GameUI {
             return;
         }
 
+        // Prevent playing another instance if the current song is already playing
+        if (musicManager.currentTheme === theme && musicManager.isPlaying) {
+            return;
+        }
+
+        // Update current theme so it plays correctly when unpaused
+        musicManager.currentTheme = theme;
+
         // Play the selected music theme
         if (!game.paused) {
             musicManager.playTheme(theme); // Async - runs in background
