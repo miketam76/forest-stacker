@@ -448,38 +448,112 @@ body {
 
 /* Responsive Design */
 @media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
     .header h1 {
-        font-size: 2rem;
+        font-size: 1.5rem;
     }
 
     .game-wrapper {
-        flex-direction: column;
+        flex-direction: row;
+        /* Keep elements side by side */
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .main-content {
+        flex: 1;
+        min-width: 0;
+        display: flex;
         align-items: center;
     }
 
     .sidebar {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        min-width: unset;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        min-width: 90px;
+        width: 110px;
+        gap: 5px;
     }
 
     .info-box {
-        flex: 1;
-        min-width: 120px;
+        flex: none;
+        min-width: 0;
+        padding: 8px 5px;
+        margin: 0;
+    }
+
+    .label {
+        font-size: 0.65rem;
+        margin-bottom: 4px;
+    }
+
+    .score-value,
+    .level-value {
+        font-size: 1.2rem;
     }
 
     .overlay-content {
-        padding: 20px;
-        margin: 20px;
+        padding: 15px;
+        margin: 15px;
     }
 
     #gameCanvas {
         width: 100%;
         height: auto;
+        aspect-ratio: 1 / 2;
+    }
+
+    .icon-buttons-row {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .icon-btn {
+        padding: 8px 0;
+        font-size: 1.2rem;
+        min-width: 32px;
     }
 }
-.icon-buttons-row { display: flex; justify-content: space-between; gap: 8px; width: 100%; position: relative; }
-.icon-dropdown { position: relative; display: flex; flex: 1; }
-.icon-btn { flex: 1; padding: 12px 0; font-size: 1.5rem; min-width: 44px; display: flex; justify-content: center; align-items: center; border-radius: 8px; }
-.icon-dropdown-menu { position: absolute; bottom: 100%; left: 0; width: 160px; max-width: 200px; background: #000; border: 2px solid #00ff00; padding: 10px; z-index: 10; margin-bottom: 10px; margin-top: 0; }
+
+.icon-buttons-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    position: relative;
+}
+
+.icon-dropdown {
+    position: relative;
+    display: flex;
+    flex: 1;
+}
+
+.icon-btn {
+    flex: 1;
+    padding: 12px 0;
+    font-size: 1.5rem;
+    min-width: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+}
+
+.icon-dropdown-menu {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    width: 160px;
+    max-width: 200px;
+    background: #000;
+    border: 2px solid #00ff00;
+    padding: 10px;
+    z-index: 10;
+    margin-bottom: 10px;
+    margin-top: 0;
+}
