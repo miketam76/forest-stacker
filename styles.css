@@ -10,15 +10,13 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     padding: 20px;
-    overflow-y: auto;
 }
 
 .container {
-    max-width: 800px;
+    max-width: 600px;
     width: 100%;
-    margin: auto;
 }
 
 .header {
@@ -45,38 +43,25 @@ body {
     display: flex;
     gap: 20px;
     justify-content: center;
-    align-items: stretch;
-    height: 80vh;
-    max-height: 800px;
-    min-height: 400px;
 }
 
 .main-content {
     display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    flex: 1;
-    min-width: 0;
+    justify-content: center;
 }
 
 #gameCanvas {
     border: 3px solid #00ff00;
     background: #000;
     box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
-    height: 100%;
-    width: auto;
-    aspect-ratio: 1 / 2;
-    object-fit: fill;
+    max-width: 100%;
 }
 
 .sidebar {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: 10px;
-    width: 250px;
-    max-width: 35%;
-    flex: none;
+    gap: 15px;
+    min-width: 140px;
 }
 
 .info-box {
@@ -462,8 +447,7 @@ body {
 }
 
 /* Responsive Design */
-@media (max-width: 600px),
-(max-height: 600px) {
+@media (max-width: 600px) {
     body {
         padding: 10px;
     }
@@ -477,8 +461,6 @@ body {
         /* Keep elements side by side */
         align-items: stretch;
         gap: 10px;
-        height: 80vh;
-        min-height: 0;
     }
 
     .main-content {
@@ -493,9 +475,7 @@ body {
         flex-wrap: nowrap;
         justify-content: space-between;
         min-width: 90px;
-        max-width: 140px;
-        width: 30%;
-        flex: none;
+        width: 110px;
         gap: 5px;
     }
 
@@ -522,51 +502,42 @@ body {
     }
 
     #gameCanvas {
-        width: auto;
-        height: 100%;
-        max-width: 100%;
+        width: 100%;
+        height: auto;
         aspect-ratio: 1 / 2;
-        max-height: none;
-        object-fit: fill;
     }
 
     .icon-buttons-row {
+        flex-wrap: wrap;
         gap: 5px;
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
     }
 
     .icon-btn {
-        flex: 1;
-        height: auto;
-        padding: 0;
+        padding: 8px 0;
         font-size: 1.2rem;
         min-width: 32px;
     }
 }
 
 .icon-buttons-row {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    display: flex;
+    justify-content: space-between;
     gap: 8px;
     width: 100%;
     position: relative;
-    margin-top: auto;
 }
 
 .icon-dropdown {
     position: relative;
     display: flex;
-    width: 100%;
+    flex: 1;
 }
 
 .icon-btn {
-    width: 100%;
-    height: auto;
-    padding: 0;
+    flex: 1;
+    padding: 12px 0;
     font-size: 1.5rem;
-    min-width: 0;
-    aspect-ratio: 1 / 1;
+    min-width: 44px;
     display: flex;
     justify-content: center;
     align-items: center;
