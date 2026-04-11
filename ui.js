@@ -59,6 +59,15 @@ class GameUI {
         this.gameStarted = false;
         this.keysPressed = {}; // Track which keys are currently pressed
 
+        // Touch gesture tuning for mobile responsiveness
+        this.touchStartX = null;
+        this.touchStartY = null;
+        this.touchMoved = false;
+        this.touchHorizontalThreshold = 45;
+        this.touchVerticalThreshold = 50;
+        this.touchHardDropThreshold = 65;
+        this.touchAxisDominanceRatio = 1.25;
+
         // Dance Event Callbacks
         game.onDanceStart = () => {
             this.preDanceTheme = musicManager.currentTheme;
@@ -223,7 +232,7 @@ class GameUI {
     }
 
     handleTouchMove(e) {
-        if (!this.touchStartX || !this.touchStartY) return;
+        if (this.touchStartX === null || this.touchStartY === null) return;
         e.preventDefault();
 
         const touchEndX = e.touches[0].clientX;
@@ -231,14 +240,20 @@ class GameUI {
 
         const diffX = touchEndX - this.touchStartX;
         const diffY = touchEndY - this.touchStartY;
+        const absDiffX = Math.abs(diffX);
+        const absDiffY = Math.abs(diffY);
 
-        // Swipe threshold
-        const threshold = 30;
+        const horizontalSwipe =
+            absDiffX > this.touchHorizontalThreshold &&
+            absDiffX > absDiffY * this.touchAxisDominanceRatio;
+        const verticalSwipe =
+            absDiffY > this.touchVerticalThreshold &&
+            absDiffY > absDiffX * this.touchAxisDominanceRatio;
 
-        if (Math.abs(diffX) > threshold || Math.abs(diffY) > threshold) {
+        if (horizontalSwipe || verticalSwipe) {
             this.touchMoved = true;
 
-            if (Math.abs(diffX) > Math.abs(diffY)) {
+            if (horizontalSwipe) {
                 // Horizontal swipe
                 if (diffX > 0) {
                     game.movePieceRight();
@@ -254,12 +269,15 @@ class GameUI {
                 if (diffY > 0) {
                     // Swipe down - soft drop
                     game.startSoftDrop();
+                    this.touchStartY = touchEndY;
                 } else {
-                    // Swipe up - hard drop
-                    game.dropPieceToBottom();
-                    game.placePiece();
-                    audioManager.playSoundLock();
-                    this.touchStartY = touchEndY; // Prevent multiple hard drops
+                    // Swipe up - hard drop (requires a larger upward movement)
+                    if (absDiffY > this.touchHardDropThreshold) {
+                        game.dropPieceToBottom();
+                        game.placePiece();
+                        audioManager.playSoundLock();
+                    }
+                    this.touchStartY = touchEndY;
                 }
             }
         }
