@@ -20,10 +20,16 @@ class GameUI {
         this.gameOverOverlay = document.getElementById('gameOverOverlay');
         this.restartBtn = document.getElementById('restartBtn');
         this.mainMenuBtn = document.getElementById('mainMenuBtn');
-        this.leaderboardBtn = document.getElementById('leaderboardBtn');
-        this.leaderboardOverlay = document.getElementById('leaderboardOverlay');
-        this.closeLeaderboardBtn = document.getElementById('closeLeaderboardBtn');
-        this.leaderboardList = document.getElementById('leaderboardList');
+        this.gameOverLeaderboardList = document.getElementById('gameOverLeaderboardList');
+
+        // Mobile gamepad controls
+        this.mobileGamepad = document.getElementById('mobileGamepad');
+        this.dpadUp = document.getElementById('dpadUp');
+        this.dpadLeft = document.getElementById('dpadLeft');
+        this.dpadDown = document.getElementById('dpadDown');
+        this.dpadRight = document.getElementById('dpadRight');
+        this.btnA = document.getElementById('btnA');
+        this.btnB = document.getElementById('btnB');
 
         // Dance Cutscene overlays
         this.danceOverlay = document.getElementById('danceOverlay');
@@ -54,6 +60,9 @@ class GameUI {
         // Input debouncing
         this.inputDebounce = {};
         this.debounceDelay = 50; // ms
+        this.mobileHoldDelay = 140;
+        this.mobileHoldInterval = 75;
+        this.mobileHoldTimers = {};
 
         // Game state
         this.gameStarted = false;
@@ -106,10 +115,12 @@ class GameUI {
         document.addEventListener('keydown', (e) => this.handleKeyDown(e));
         document.addEventListener('keyup', (e) => this.handleKeyUp(e));
 
-        // Touch controls
-        this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
-        this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
-        this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+        // Touch gestures remain for larger screens only.
+        if (!this.isMobileViewport()) {
+            this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+            this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+            this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+        }
 
         // Button controls
         this.startBtn.addEventListener('click', () => this.startGame());
@@ -118,8 +129,6 @@ class GameUI {
         this.endGameBtn.addEventListener('click', () => this.endGame());
         this.restartBtn.addEventListener('click', () => this.restartGame());
         this.mainMenuBtn.addEventListener('click', () => this.showMainMenu());
-        this.leaderboardBtn.addEventListener('click', () => this.showLeaderboard());
-        this.closeLeaderboardBtn.addEventListener('click', () => this.hideLeaderboard());
 
         // Music dropdown toggle
         if (this.musicDropdownToggle) {
@@ -150,6 +159,106 @@ class GameUI {
                 if (this.inGameMusicOptions) this.inGameMusicOptions.classList.add('hidden');
             });
         });
+
+        this.bindMobileGamepadControls();
+        window.addEventListener('resize', () => this.updateMobileControlsVisibility());
+    }
+
+    isMobileViewport() {
+        return window.matchMedia('(max-width: 600px)').matches;
+    }
+
+    bindMobileGamepadControls() {
+        if (!this.mobileGamepad) return;
+
+        this.bindHeldActionButton(this.dpadLeft, 'left', () => game.movePieceLeft());
+        this.bindHeldActionButton(this.dpadRight, 'right', () => game.movePieceRight());
+        this.bindHeldActionButton(this.dpadUp, 'up', () => game.rotatePiece());
+
+        const stopSoftDrop = () => game.endSoftDrop();
+
+        if (this.dpadDown) {
+            this.dpadDown.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                game.startSoftDrop();
+            });
+            this.dpadDown.addEventListener('pointerup', stopSoftDrop);
+            this.dpadDown.addEventListener('pointercancel', stopSoftDrop);
+            this.dpadDown.addEventListener('pointerleave', stopSoftDrop);
+        }
+
+        if (this.btnA) {
+            this.btnA.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                game.dropPieceToBottom();
+            });
+        }
+
+        if (this.btnB) {
+            this.btnB.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                this.togglePause();
+            });
+        }
+    }
+
+    bindHeldActionButton(button, actionKey, actionFn) {
+        if (!button) return;
+
+        button.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            this.startHeldAction(actionKey, actionFn);
+        });
+
+        const stopAction = () => this.stopHeldAction(actionKey);
+        button.addEventListener('pointerup', stopAction);
+        button.addEventListener('pointercancel', stopAction);
+        button.addEventListener('pointerleave', stopAction);
+    }
+
+    startHeldAction(actionKey, actionFn) {
+        this.stopHeldAction(actionKey);
+        actionFn();
+
+        const timeoutId = setTimeout(() => {
+            const intervalId = setInterval(() => {
+                actionFn();
+            }, this.mobileHoldInterval);
+
+            if (this.mobileHoldTimers[actionKey]) {
+                this.mobileHoldTimers[actionKey].intervalId = intervalId;
+            }
+        }, this.mobileHoldDelay);
+
+        this.mobileHoldTimers[actionKey] = { timeoutId, intervalId: null };
+    }
+
+    stopHeldAction(actionKey) {
+        const timer = this.mobileHoldTimers[actionKey];
+        if (!timer) return;
+
+        clearTimeout(timer.timeoutId);
+        if (timer.intervalId !== null) {
+            clearInterval(timer.intervalId);
+        }
+
+        delete this.mobileHoldTimers[actionKey];
+    }
+
+    stopAllHeldActions() {
+        Object.keys(this.mobileHoldTimers).forEach((actionKey) => {
+            this.stopHeldAction(actionKey);
+        });
+    }
+
+    updateMobileControlsVisibility() {
+        if (!this.mobileGamepad) return;
+
+        const showControls = this.isMobileViewport() && this.gameStarted && !game.gameOver;
+        this.mobileGamepad.classList.toggle('active', showControls);
+        if (!showControls) {
+            this.stopAllHeldActions();
+        }
     }
 
     // Keyboard event handler
@@ -225,6 +334,7 @@ class GameUI {
 
     // Touch controls
     handleTouchStart(e) {
+        if (this.isMobileViewport()) return;
         e.preventDefault(); // Prevent scrolling
         this.touchStartX = e.touches[0].clientX;
         this.touchStartY = e.touches[0].clientY;
@@ -232,6 +342,7 @@ class GameUI {
     }
 
     handleTouchMove(e) {
+        if (this.isMobileViewport()) return;
         if (this.touchStartX === null || this.touchStartY === null) return;
         e.preventDefault();
 
@@ -284,6 +395,7 @@ class GameUI {
     }
 
     handleTouchEnd(e) {
+        if (this.isMobileViewport()) return;
         e.preventDefault();
         game.endSoftDrop();
 
@@ -325,6 +437,7 @@ class GameUI {
         this.gameOverShown = false;
         this.gameStarted = true; // Mark game as started
         game.paused = false; // Unpause the game
+        this.updateMobileControlsVisibility();
 
         // Start playing selected music
         const selectedTheme = Object.entries(this.musicButtons)
@@ -379,7 +492,7 @@ class GameUI {
         game.restart();
         game.paused = false; // Unpause the game
         this.gameOverOverlay.classList.add('hidden');
-        this.hideLeaderboard();
+        this.updateMobileControlsVisibility();
 
         // Resume music
         const selectedTheme = Object.entries(this.musicButtons)
@@ -391,7 +504,6 @@ class GameUI {
     showMainMenu() {
         // First, ensure all overlays are hidden
         this.gameOverOverlay.classList.add('hidden');
-        this.leaderboardOverlay.classList.add('hidden');
 
         // Reset game state
         this.gameOverShown = false;
@@ -403,6 +515,8 @@ class GameUI {
 
         // Stop music
         musicManager.stopAll();
+
+        this.updateMobileControlsVisibility();
 
         // Finally, show the start overlay
         this.startOverlay.classList.remove('hidden');
@@ -412,7 +526,6 @@ class GameUI {
     endGame() {
         // First, ensure all overlays are hidden
         this.gameOverOverlay.classList.add('hidden');
-        this.leaderboardOverlay.classList.add('hidden');
 
         // Reset game state
         this.gameOverShown = false;
@@ -425,6 +538,8 @@ class GameUI {
         // Stop music
         musicManager.stopAll();
 
+        this.updateMobileControlsVisibility();
+
         // Finally, show the start overlay
         this.startOverlay.classList.remove('hidden');
     }
@@ -432,28 +547,22 @@ class GameUI {
     // Show game over screen
     showGameOver() {
         this.finalScoreDisplay.textContent = game.score;
+        this.gameStarted = false;
         this.gameOverOverlay.classList.remove('hidden');
         gameStorage.saveScore(game.score);
-    }
-
-    // Show leaderboard
-    showLeaderboard() {
-        this.leaderboardOverlay.classList.remove('hidden');
         this.updateLeaderboardDisplay();
-    }
-
-    // Hide leaderboard
-    hideLeaderboard() {
-        this.leaderboardOverlay.classList.add('hidden');
+        this.updateMobileControlsVisibility();
     }
 
     // Update leaderboard display
     updateLeaderboardDisplay() {
         const scores = gameStorage.getLeaderboard();
-        this.leaderboardList.innerHTML = '';
+        if (!this.gameOverLeaderboardList) return;
+
+        this.gameOverLeaderboardList.innerHTML = '';
 
         if (scores.length === 0) {
-            this.leaderboardList.innerHTML = '<div class="leaderboard-empty">No scores yet. Play to get on the board!</div>';
+            this.gameOverLeaderboardList.innerHTML = '<div class="leaderboard-empty">No scores yet. Play to get on the board!</div>';
             return;
         }
 
@@ -465,7 +574,7 @@ class GameUI {
                 <span class="leaderboard-name">Score: </span>
                 <span class="leaderboard-score">${entry.score}</span>
                 `;
-            this.leaderboardList.appendChild(item);
+            this.gameOverLeaderboardList.appendChild(item);
         });
     }
 

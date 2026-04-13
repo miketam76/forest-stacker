@@ -4,20 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stacker</title>
+    <title>Forest Stacker</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
     <div class="container">
-        <div class="header">
-            <h1>FOREST STACKER</h1>
-            <!-- <div class="header-buttons">
+        <!-- <div class="header"> -->
+        <!-- <h1>FOREST STACKER</h1> -->
+        <!-- <div class="header-buttons">
                 <button id="muteBtn" class="button" title="Mute/Unmute">🔊</button>
                 <button id="pauseBtn" class="button">PAUSE</button>
                 <button id="endGameBtn" class="button" title="End Game">END GAME</button>
             </div> -->
-        </div>
+        <!-- </div> -->
 
         <div class="game-wrapper">
             <div class="main-content">
@@ -55,10 +55,22 @@
                             <button id="inGameCeltic" class="music-btn" data-theme="celtic">🎻 Celtic</button>
                         </div>
                     </div>
-                    <button id="leaderboardBtn" class="button icon-btn" title="Leaderboard">🏆</button>
                     <button id="muteBtn" class="button icon-btn" title="Mute/Unmute">🔊</button>
                     <button id="pauseBtn" class="button icon-btn" title="Pause Game">⏸️</button>
                     <button id="endGameBtn" class="button icon-btn" title="End Game">⏹️</button>
+                </div>
+            </div>
+
+            <div id="mobileGamepad" class="mobile-gamepad" aria-label="Mobile game controls">
+                <div class="dpad" aria-label="Directional pad">
+                    <button id="dpadUp" class="button dpad-btn" title="Rotate">▲</button>
+                    <button id="dpadLeft" class="button dpad-btn" title="Move Left">◀</button>
+                    <button id="dpadDown" class="button dpad-btn" title="Soft Drop">▼</button>
+                    <button id="dpadRight" class="button dpad-btn" title="Move Right">▶</button>
+                </div>
+                <div class="action-buttons" aria-label="Action buttons">
+                    <button id="btnB" class="button action-btn" title="Pause">B</button>
+                    <button id="btnA" class="button action-btn" title="Hard Drop">A</button>
                 </div>
             </div>
         </div>
@@ -91,8 +103,8 @@
                     <p>⌨️ Down / S - Soft Drop</p>
                     <p>⌨️ Space - Hard Drop</p>
                     <p>⌨️ P - Pause</p>
-                    <p>📱 Mobile: Swipe to Move, Tap to Rotate</p>
-                    <p>📱 Mobile: Swipe Down to Drop, Up to Hard Drop</p>
+                    <p>📱 Mobile D-pad: ◀ ▼ ▶ move, ▲ rotate</p>
+                    <p>📱 Mobile Buttons: B pauses, A hard drops</p>
                 </div>
                 <button id="startBtn" class="button button-large">START GAME</button>
             </div>
@@ -109,14 +121,10 @@
                     <button id="restartBtn" class="button">PLAY AGAIN</button>
                     <button id="mainMenuBtn" class="button">MAIN MENU</button>
                 </div>
-            </div>
-        </div>
-
-        <div id="leaderboardOverlay" class="overlay hidden">
-            <div class="overlay-content leaderboard-modal">
-                <h2>HIGH SCORES</h2>
-                <div id="leaderboardList" class="leaderboard-list"></div>
-                <button id="closeLeaderboardBtn" class="button">CLOSE</button>
+                <div class="game-over-leaderboard">
+                    <h3>HIGH SCORES</h3>
+                    <div id="gameOverLeaderboardList" class="leaderboard-list"></div>
+                </div>
             </div>
         </div>
 

@@ -48,6 +48,24 @@ body {
 .main-content {
     display: flex;
     justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mobile-gamepad {
+    display: none;
+}
+
+.game-over-leaderboard {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.game-over-leaderboard h3 {
+    color: #00ff00;
+    margin-bottom: 8px;
+    text-align: center;
+    font-size: 1.1rem;
 }
 
 #gameCanvas {
@@ -450,6 +468,7 @@ body {
 @media (max-width: 600px) {
     body {
         padding: 10px;
+        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
     }
 
     .header h1 {
@@ -457,26 +476,35 @@ body {
     }
 
     .game-wrapper {
+        display: flex;
         flex-direction: row;
-        /* Keep elements side by side */
+        flex-wrap: wrap;
         align-items: stretch;
         gap: 10px;
     }
 
     .main-content {
-        flex: 1;
+        flex: 1 1 calc(100% - 120px);
         min-width: 0;
+        max-width: calc(100% - 120px);
         display: flex;
-        align-items: center;
+        justify-content: center;
+        align-items: flex-start;
     }
 
     .sidebar {
+        flex: 0 0 110px;
+        width: 110px;
+        min-width: 110px;
+        align-self: stretch;
         flex-direction: column;
         flex-wrap: nowrap;
-        justify-content: space-between;
-        min-width: 90px;
-        width: 110px;
+        justify-content: flex-start;
         gap: 5px;
+    }
+
+    .sidebar .icon-buttons-row {
+        margin-top: auto;
     }
 
     .info-box {
@@ -516,6 +544,92 @@ body {
         padding: 8px 0;
         font-size: 1.2rem;
         min-width: 32px;
+    }
+
+    #pauseBtn {
+        display: none;
+    }
+
+    .mobile-gamepad {
+        display: none;
+        order: 3;
+        width: 100%;
+        margin-top: 14px;
+        margin-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+        padding: 10px 8px 6px;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .mobile-gamepad.active {
+        display: flex;
+    }
+
+    .dpad {
+        display: grid;
+        grid-template-columns: repeat(3, 64px);
+        grid-template-rows: repeat(3, 64px);
+        grid-template-areas:
+            ". up ."
+            "left down right"
+            ". . .";
+        gap: 8px;
+    }
+
+    #dpadUp {
+        grid-area: up;
+    }
+
+    #dpadLeft {
+        grid-area: left;
+    }
+
+    #dpadDown {
+        grid-area: down;
+    }
+
+    #dpadRight {
+        grid-area: right;
+    }
+
+    .dpad-btn,
+    .action-btn {
+        width: 64px;
+        height: 64px;
+        padding: 0;
+        border-radius: 12px;
+        font-size: 1.6rem;
+        line-height: 1;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+        touch-action: manipulation;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 14px;
+        margin-right: 4px;
+        transform: translateY(-8px);
+    }
+
+    .action-btn {
+        border-radius: 50%;
+        font-size: 1.7rem;
+    }
+
+    .game-over-leaderboard {
+        margin-top: 12px;
+    }
+
+    .game-over-leaderboard .leaderboard-list {
+        margin: 10px 0 0;
+        max-height: 140px;
+        overflow-y: auto;
     }
 }
 
@@ -587,5 +701,24 @@ body {
         height: 100%;
         padding: 0;
         font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .dpad {
+        grid-template-columns: repeat(3, 58px);
+        grid-template-rows: repeat(3, 58px);
+        gap: 7px;
+    }
+
+    .dpad-btn,
+    .action-btn {
+        width: 58px;
+        height: 58px;
+        font-size: 1.45rem;
+    }
+
+    .action-buttons {
+        gap: 10px;
     }
 }
