@@ -61,8 +61,8 @@ class GameUI {
         // Input debouncing
         this.inputDebounce = {};
         this.debounceDelay = 50; // ms
-        this.mobileHoldDelay = 140;
-        this.mobileHoldInterval = 75;
+        this.mobileHoldDelay = 95;
+        this.mobileHoldInterval = 55;
         this.mobileHoldTimers = {};
 
         // Game state
@@ -423,10 +423,12 @@ class GameUI {
         game.togglePause();
         if (game.paused) {
             this.pauseBtn.textContent = '▶️';
+            if (this.btnPauseMobile) this.btnPauseMobile.textContent = '▶';
             // Pause music by stopping playback
             musicManager.pauseMusic();
         } else {
             this.pauseBtn.textContent = '⏸️';
+            if (this.btnPauseMobile) this.btnPauseMobile.textContent = '⏸';
             // Resume music
             musicManager.resumeMusic();
         }
@@ -445,11 +447,14 @@ class GameUI {
         this.gameOverShown = false;
         this.gameStarted = true; // Mark game as started
         game.paused = false; // Unpause the game
+        this.pauseBtn.textContent = '⏸️';
+        if (this.btnPauseMobile) this.btnPauseMobile.textContent = '⏸';
         this.updateMobileControlsVisibility();
 
         // Start playing selected music
         const selectedTheme = Object.entries(this.musicButtons)
             .find(([_, btn]) => btn.classList.contains('active'))?.[0] || 'woodland';
+        musicManager.stopAll();
         musicManager.playTheme(selectedTheme); // Async - runs in background
     }
 
@@ -487,8 +492,9 @@ class GameUI {
         // Update current theme so it plays correctly when unpaused
         musicManager.currentTheme = theme;
 
-        // Play the selected music theme
-        if (!game.paused) {
+        // Play selected theme in main menu preview, or while actively playing.
+        const inMainMenu = !this.gameStarted && !this.startOverlay.classList.contains('hidden');
+        if (inMainMenu || !game.paused) {
             musicManager.playTheme(theme); // Async - runs in background
         }
     }
@@ -499,12 +505,15 @@ class GameUI {
         this.gameStarted = true; // Mark game as started
         game.restart();
         game.paused = false; // Unpause the game
+        this.pauseBtn.textContent = '⏸️';
+        if (this.btnPauseMobile) this.btnPauseMobile.textContent = '⏸';
         this.gameOverOverlay.classList.add('hidden');
         this.updateMobileControlsVisibility();
 
         // Resume music
         const selectedTheme = Object.entries(this.musicButtons)
             .find(([_, btn]) => btn.classList.contains('active'))?.[0] || 'woodland';
+        musicManager.stopAll();
         musicManager.playTheme(selectedTheme); // Async - runs in background
     }
 
@@ -523,6 +532,8 @@ class GameUI {
 
         // Stop music
         musicManager.stopAll();
+        this.pauseBtn.textContent = '⏸️';
+        if (this.btnPauseMobile) this.btnPauseMobile.textContent = '⏸';
 
         this.updateMobileControlsVisibility();
 
@@ -545,6 +556,8 @@ class GameUI {
 
         // Stop music
         musicManager.stopAll();
+        this.pauseBtn.textContent = '⏸️';
+        if (this.btnPauseMobile) this.btnPauseMobile.textContent = '⏸';
 
         this.updateMobileControlsVisibility();
 
@@ -556,6 +569,9 @@ class GameUI {
     showGameOver() {
         this.finalScoreDisplay.textContent = game.score;
         this.gameStarted = false;
+        musicManager.stopAll();
+        this.pauseBtn.textContent = '⏸️';
+        if (this.btnPauseMobile) this.btnPauseMobile.textContent = '⏸';
         this.gameOverOverlay.classList.remove('hidden');
         gameStorage.saveScore(game.score);
         this.updateLeaderboardDisplay();
