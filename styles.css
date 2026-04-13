@@ -558,7 +558,7 @@ body {
         margin-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
         padding: 10px 8px 6px;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-end;
         gap: 16px;
     }
 
@@ -569,11 +569,10 @@ body {
     .dpad {
         display: grid;
         grid-template-columns: repeat(3, 64px);
-        grid-template-rows: repeat(3, 64px);
+        grid-template-rows: repeat(2, 64px);
         grid-template-areas:
             ". up ."
-            "left down right"
-            ". . .";
+            "left down right";
         gap: 8px;
     }
 
@@ -610,16 +609,27 @@ body {
 
     .action-buttons {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin-right: 4px;
+    }
+
+    .action-buttons-row {
+        display: flex;
         align-items: center;
         gap: 14px;
-        margin-right: 4px;
-        transform: translateY(-8px);
     }
 
     .action-btn {
         border-radius: 50%;
         font-size: 1.7rem;
+    }
+
+    .action-pause-btn {
+        width: 56px;
+        height: 56px;
+        font-size: 1.2rem;
     }
 
     .game-over-leaderboard {
@@ -707,7 +717,7 @@ body {
 @media (max-width: 380px) {
     .dpad {
         grid-template-columns: repeat(3, 58px);
-        grid-template-rows: repeat(3, 58px);
+        grid-template-rows: repeat(2, 58px);
         gap: 7px;
     }
 
@@ -719,6 +729,16 @@ body {
     }
 
     .action-buttons {
+        gap: 8px;
+    }
+
+    .action-buttons-row {
         gap: 10px;
+    }
+
+    .action-pause-btn {
+        width: 52px;
+        height: 52px;
+        font-size: 1.1rem;
     }
 }

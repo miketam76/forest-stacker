@@ -1,4 +1,4 @@
-# Stacker
+# Forest Stacker
 
 > ⚠️ **DISCLAIMER**: This is a **prototype/educational project** created for learning purposes only. This project is NOT intended for public distribution, commercial use, or any public release. Tetris is a registered trademark owned by The Tetris Company, and this implementation is not affiliated with or endorsed by them. Please do not distribute or use this project publicly.
 
@@ -8,12 +8,12 @@ A fully-featured game inspired by Tetris built with HTML/CSS/JavaScript featurin
 - ⬇️ **Classic Tetris Gameplay** - 7 tetrominoes with proper collision detection
 - 🎯 **Stacker Bonus** - Clear all 4 lines at once for maximum points (1200 pts!)
 - 📊 **Scoring System** - Points for 1/2/3/4-line clears, progressive levels
-- 🎮 **Responsive Controls** - Keyboard (arrows/WASD), Touch (swipe), and mouse buttons
+- 🎮 **Responsive Controls** - Keyboard plus a mobile on-screen gamepad
 - 👻 **Ghost Piece** - Preview showing where your piece will land
 - 🔊 **Sound Effects** - Retro audio feedback with mute toggle
-- 💾 **Local Leaderboard** - Top 10 high scores saved to browser storage
+- 💾 **Local Leaderboard** - Top 10 high scores saved to browser storage (shown on game over)
 - ⏸️ **Pause/Resume** - Play at your own pace
-- 📱 **Mobile-Friendly** - Touch controls and responsive design
+- 📱 **Mobile-Friendly** - Game Boy-style layout with a bottom gamepad
 - 🎨 **Retro Aesthetic** - Classic neon green on black
 
 ## How to Play
@@ -28,10 +28,13 @@ A fully-featured game inspired by Tetris built with HTML/CSS/JavaScript featurin
 - `P` - Pause/Resume
 - **Combo**: Hold `↓` + press any action key (arrows, rotate, space) = Hard drop
 
-**Mobile/Touch:**
-- **Swipe Left/Right** - Move piece
-- **Swipe Down** - Soft drop (accelerated falling)
-- **Buttons** - Pause, Leaderboard, Mute
+**Mobile Gamepad:**
+- **D-pad Left/Right** - Move piece left/right (hold to repeat)
+- **D-pad Down** - Soft drop while held
+- **D-pad Up** - Rotate piece
+- **A Button** - Rotate piece
+- **B Button** - Hard drop
+- **Top Pause Button (⏸)** - Pause/Resume
 
 ### Scoring
 
@@ -83,7 +86,7 @@ Works on all modern browsers with HTML5 Canvas and Web Audio API support:
 1. **Look for the ghost piece** - It shows where your current piece will land
 2. **Go for Stacker!** - 4-line clears award massive points (1200 pts)
 3. **Speed matters** - Higher levels move faster but award more points
-4. **Mobile gameplay** - Use the sidebar buttons for easier control on small screens
+4. **Mobile gameplay** - Use the bottom gamepad controls; hold directional buttons for smoother movement
 5. **Music selection** - Choose your music theme before starting the game!
 
 ## Music & Audio

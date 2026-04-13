@@ -30,6 +30,7 @@ class GameUI {
         this.dpadRight = document.getElementById('dpadRight');
         this.btnA = document.getElementById('btnA');
         this.btnB = document.getElementById('btnB');
+        this.btnPauseMobile = document.getElementById('btnPauseMobile');
 
         // Dance Cutscene overlays
         this.danceOverlay = document.getElementById('danceOverlay');
@@ -190,12 +191,19 @@ class GameUI {
         if (this.btnA) {
             this.btnA.addEventListener('pointerdown', (e) => {
                 e.preventDefault();
-                game.dropPieceToBottom();
+                game.rotatePiece();
             });
         }
 
         if (this.btnB) {
             this.btnB.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                game.dropPieceToBottom();
+            });
+        }
+
+        if (this.btnPauseMobile) {
+            this.btnPauseMobile.addEventListener('pointerdown', (e) => {
                 e.preventDefault();
                 this.togglePause();
             });
