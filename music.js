@@ -39,6 +39,10 @@ class MusicManager {
             danceParty: {
                 name: '🕺 Dance Party',
                 description: 'High energy celebration'
+            },
+            victory: {
+                name: '🏆 Victory Theme',
+                description: 'Triumphant synth-pop finale'
             }
         };
     }
@@ -259,6 +263,74 @@ class MusicManager {
         ];
     }
 
+    // Victory lead - upbeat finale with confident melodic hooks.
+    victoryLeadMelody() {
+        return [
+            { pitch: 'E4', duration: 0.5, volume: 0.18, waveType: 'square' },
+            { pitch: 'G4', duration: 0.5, volume: 0.18, waveType: 'square' },
+            { pitch: 'B4', duration: 1, volume: 0.18, waveType: 'square' },
+            { pitch: 'G4', duration: 0.5, volume: 0.18, waveType: 'square' },
+            { pitch: 'E4', duration: 0.5, volume: 0.18, waveType: 'square' },
+
+            { pitch: 'A4', duration: 0.5, volume: 0.2, waveType: 'square' },
+            { pitch: 'B4', duration: 0.5, volume: 0.2, waveType: 'square' },
+            { pitch: 'C5', duration: 1, volume: 0.2, waveType: 'square' },
+            { pitch: 'B4', duration: 0.5, volume: 0.2, waveType: 'square' },
+            { pitch: 'A4', duration: 0.5, volume: 0.2, waveType: 'square' },
+
+            { pitch: 'G4', duration: 0.5, volume: 0.18, waveType: 'square' },
+            { pitch: 'E4', duration: 0.5, volume: 0.18, waveType: 'square' },
+            { pitch: 'D4', duration: 1, volume: 0.18, waveType: 'square' },
+            { pitch: 'E4', duration: 0.5, volume: 0.18, waveType: 'square' },
+            { pitch: 'G4', duration: 0.5, volume: 0.18, waveType: 'square' },
+
+            { pitch: 'C5', duration: 1, volume: 0.22, waveType: 'square' },
+            { pitch: 'B4', duration: 1, volume: 0.22, waveType: 'square' },
+            { pitch: 'A4', duration: 1, volume: 0.22, waveType: 'square' },
+            { pitch: 'G4', duration: 1, volume: 0.22, waveType: 'square' }
+        ];
+    }
+
+    // Victory bass - syncopated pulse for a celebratory winner groove.
+    victoryBassMelody() {
+        return [
+            { pitch: 'E3', duration: 0.5, volume: 0.18, waveType: 'sawtooth' },
+            { pitch: 'E3', duration: 0.5, volume: 0.18, waveType: 'sawtooth' },
+            { pitch: 'B3', duration: 1, volume: 0.18, waveType: 'sawtooth' },
+            { pitch: 'E3', duration: 1, volume: 0.18, waveType: 'sawtooth' },
+
+            { pitch: 'A3', duration: 0.5, volume: 0.18, waveType: 'sawtooth' },
+            { pitch: 'A3', duration: 0.5, volume: 0.18, waveType: 'sawtooth' },
+            { pitch: 'E3', duration: 1, volume: 0.18, waveType: 'sawtooth' },
+            { pitch: 'A3', duration: 1, volume: 0.18, waveType: 'sawtooth' },
+
+            { pitch: 'G3', duration: 0.5, volume: 0.18, waveType: 'sawtooth' },
+            { pitch: 'G3', duration: 0.5, volume: 0.18, waveType: 'sawtooth' },
+            { pitch: 'D3', duration: 1, volume: 0.18, waveType: 'sawtooth' },
+            { pitch: 'G3', duration: 1, volume: 0.18, waveType: 'sawtooth' }
+        ];
+    }
+
+    // Victory chords - bright accents that reinforce the triumphant mood.
+    victoryChordStabs() {
+        return [
+            { pitch: 'B4', duration: 0.5, volume: 0.14, waveType: 'triangle' },
+            { pitch: 'E5', duration: 0.5, volume: 0.14, waveType: 'triangle' },
+            { pitch: 'G5', duration: 1, volume: 0.14, waveType: 'triangle' },
+            { pitch: 'E5', duration: 1, volume: 0.14, waveType: 'triangle' },
+
+            { pitch: 'C5', duration: 0.5, volume: 0.14, waveType: 'triangle' },
+            { pitch: 'E5', duration: 0.5, volume: 0.14, waveType: 'triangle' },
+            { pitch: 'A5', duration: 1, volume: 0.14, waveType: 'triangle' },
+            { pitch: 'E5', duration: 1, volume: 0.14, waveType: 'triangle' },
+
+            { pitch: 'B4', duration: 0.5, volume: 0.14, waveType: 'triangle' },
+            { pitch: 'D5', duration: 0.5, volume: 0.14, waveType: 'triangle' },
+            { pitch: 'G5', duration: 1, volume: 0.14, waveType: 'triangle' },
+            { pitch: 'D5', duration: 1, volume: 0.14, waveType: 'triangle' }
+        ];
+    }
+
     // Stop all current music
     stopAll() {
         this.playbackSessionId++;
@@ -289,6 +361,7 @@ class MusicManager {
         else if (theme === 'zen') melody = this.zenMelody();
         else if (theme === 'celtic') melody = this.celticMelody();
         else if (theme === 'danceParty') melody = this.dancePartyMelody();
+        else if (theme === 'victory') melody = this.victoryLeadMelody();
         else return;
 
         // Woodland and Celtic intentionally use a delayed second layer for texture.
@@ -323,6 +396,16 @@ class MusicManager {
             return;
         }
 
+        if (theme === 'victory') {
+            const bassMelody = this.victoryBassMelody();
+            const chordMelody = this.victoryChordStabs();
+
+            this.playThemeLoop(theme, melody, bpm, sessionId, 0, 0.9);
+            this.playThemeLoop(theme, bassMelody, bpm, sessionId, 1000, 0.55);
+            this.playThemeLoop(theme, chordMelody, bpm, sessionId, 2000, 0.5);
+            return;
+        }
+
         await this.playThemeLoop(theme, melody, bpm, sessionId);
     }
 
@@ -332,7 +415,8 @@ class MusicManager {
             woodland: 120,
             zen: 60,
             celtic: 140,
-            danceParty: 160
+            danceParty: 160,
+            victory: 128
         };
         return bpms[theme] || 120;
     }

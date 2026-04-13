@@ -18,9 +18,13 @@ class GameUI {
         this.pauseBtn = document.getElementById('pauseBtn');
         this.endGameBtn = document.getElementById('endGameBtn');
         this.gameOverOverlay = document.getElementById('gameOverOverlay');
+        this.gameWinOverlay = document.getElementById('gameWinOverlay');
         this.restartBtn = document.getElementById('restartBtn');
         this.mainMenuBtn = document.getElementById('mainMenuBtn');
+        this.winRestartBtn = document.getElementById('winRestartBtn');
+        this.winMainMenuBtn = document.getElementById('winMainMenuBtn');
         this.gameOverLeaderboardList = document.getElementById('gameOverLeaderboardList');
+        this.winFinalScoreDisplay = document.getElementById('winFinalScore');
 
         // Mobile gamepad controls
         this.mobileGamepad = document.getElementById('mobileGamepad');
@@ -67,6 +71,8 @@ class GameUI {
 
         // Game state
         this.gameStarted = false;
+        this.gameOverShown = false;
+        this.gameWonShown = false;
         this.keysPressed = {}; // Track which keys are currently pressed
 
         // Touch gesture tuning for mobile responsiveness
@@ -130,6 +136,8 @@ class GameUI {
         this.endGameBtn.addEventListener('click', () => this.endGame());
         this.restartBtn.addEventListener('click', () => this.restartGame());
         this.mainMenuBtn.addEventListener('click', () => this.showMainMenu());
+        if (this.winRestartBtn) this.winRestartBtn.addEventListener('click', () => this.restartGame());
+        if (this.winMainMenuBtn) this.winMainMenuBtn.addEventListener('click', () => this.showMainMenu());
 
         // Music dropdown toggle
         if (this.musicDropdownToggle) {
@@ -445,10 +453,13 @@ class GameUI {
     startGame() {
         this.startOverlay.classList.add('hidden');
         this.gameOverShown = false;
+        this.gameWonShown = false;
         this.gameStarted = true; // Mark game as started
         game.paused = false; // Unpause the game
         this.pauseBtn.textContent = '⏸️';
         if (this.btnPauseMobile) this.btnPauseMobile.textContent = '⏸';
+        if (this.gameOverOverlay) this.gameOverOverlay.classList.add('hidden');
+        if (this.gameWinOverlay) this.gameWinOverlay.classList.add('hidden');
         this.updateMobileControlsVisibility();
 
         // Start playing selected music
@@ -505,12 +516,14 @@ class GameUI {
     // Restart game
     restartGame() {
         this.gameOverShown = false;
+        this.gameWonShown = false;
         this.gameStarted = true; // Mark game as started
         game.restart();
         game.paused = false; // Unpause the game
         this.pauseBtn.textContent = '⏸️';
         if (this.btnPauseMobile) this.btnPauseMobile.textContent = '⏸';
         this.gameOverOverlay.classList.add('hidden');
+        if (this.gameWinOverlay) this.gameWinOverlay.classList.add('hidden');
         this.updateMobileControlsVisibility();
 
         // Resume music
@@ -524,6 +537,7 @@ class GameUI {
     showMainMenu() {
         // First, ensure all overlays are hidden
         this.gameOverOverlay.classList.add('hidden');
+        if (this.gameWinOverlay) this.gameWinOverlay.classList.add('hidden');
 
         // Reset game state
         this.gameOverShown = false;
@@ -548,6 +562,7 @@ class GameUI {
     endGame() {
         // First, ensure all overlays are hidden
         this.gameOverOverlay.classList.add('hidden');
+        if (this.gameWinOverlay) this.gameWinOverlay.classList.add('hidden');
 
         // Reset game state
         this.gameOverShown = false;
@@ -578,6 +593,21 @@ class GameUI {
         this.gameOverOverlay.classList.remove('hidden');
         gameStorage.saveScore(game.score);
         this.updateLeaderboardDisplay();
+        this.updateMobileControlsVisibility();
+    }
+
+    // Show winner screen at level cap
+    showGameWon() {
+        if (this.winFinalScoreDisplay) this.winFinalScoreDisplay.textContent = game.score;
+        this.gameStarted = false;
+        game.paused = true;
+        musicManager.stopAll();
+        musicManager.playTheme('victory');
+        this.pauseBtn.textContent = '⏸️';
+        if (this.btnPauseMobile) this.btnPauseMobile.textContent = '⏸';
+        if (this.gameOverOverlay) this.gameOverOverlay.classList.add('hidden');
+        if (this.gameWinOverlay) this.gameWinOverlay.classList.remove('hidden');
+        gameStorage.saveScore(game.score);
         this.updateMobileControlsVisibility();
     }
 
@@ -933,8 +963,14 @@ class GameUI {
                 game.update(currentTime);
             }
 
+            // Check for game win (priority over game-over modal)
+            if (game.gameWon && !this.gameWonShown) {
+                this.gameWonShown = true;
+                this.showGameWon();
+            }
+
             // Check for game over
-            if (game.gameOver && !this.gameOverShown) {
+            if (game.gameOver && !game.gameWon && !this.gameOverShown) {
                 this.gameOverShown = true;
                 this.showGameOver();
             }

@@ -13,10 +13,12 @@ class Game {
         this.nextPiece = null;
         this.score = 0;
         this.level = 1;
+        this.maxLevel = 30;
         this.linesCleared = 0;
         this.currentLevelLines = 0;
         this.linesToNextLevel = 10;
         this.gameOver = false;
+        this.gameWon = false;
         this.paused = false;
         this.isDancing = false;
         this.onDanceStart = null;
@@ -343,6 +345,14 @@ class Game {
             leveledUp = true;
         }
 
+        // Winning condition: reaching level 30 ends the run with a victory state.
+        if (leveledUp && this.level >= this.maxLevel) {
+            this.gameWon = true;
+            this.paused = true;
+            this.isDancing = false;
+            return;
+        }
+
         // Trigger dance cutscene every 5 levels passed
         if (leveledUp && (this.level - 1) % 5 === 0) {
             this.triggerDanceParty();
@@ -390,11 +400,13 @@ class Game {
         this.nextPiece = this.createNewPiece();
         this.score = 0;
         this.level = 1;
+        this.maxLevel = 30;
         this.linesCleared = 0;
         this.currentLevelLines = 0;
         this.linesToNextLevel = 10;
         this.isDancing = false;
         this.gameOver = false;
+        this.gameWon = false;
         this.paused = false;
         this.dropInterval = 800;
         this.lastDropTime = 0;
