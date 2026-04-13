@@ -484,19 +484,22 @@ class GameUI {
             return;
         }
 
-        // Prevent playing another instance if the current song is already playing
+        // Prevent unnecessary restarts if the selected theme is already running.
         if (musicManager.currentTheme === theme && musicManager.isPlaying) {
             return;
         }
 
-        // Update current theme so it plays correctly when unpaused
-        musicManager.currentTheme = theme;
-
-        // Play selected theme in main menu preview, or while actively playing.
-        const inMainMenu = !this.gameStarted && !this.startOverlay.classList.contains('hidden');
-        if (inMainMenu || !game.paused) {
-            musicManager.playTheme(theme); // Async - runs in background
+        // Do not preview music in the main menu or while paused/game over.
+        // Music should start only when gameplay starts/resumes.
+        const isActivelyPlaying = this.gameStarted && !game.paused && !game.gameOver;
+        if (!isActivelyPlaying) {
+            // Keep the selected theme for the next game start/restart.
+            musicManager.currentTheme = theme;
+            return;
         }
+
+        musicManager.currentTheme = theme;
+        musicManager.playTheme(theme); // Async - runs in background
     }
 
     // Restart game

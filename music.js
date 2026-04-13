@@ -10,6 +10,7 @@ class MusicManager {
         this.isPlaying = false;
         this.playbackRate = 1.0;
         this.masterVolume = 0.15; // Lower volume for background music
+        this.playbackSessionId = 0; // Invalidate older async theme loops
 
         // Note frequencies (C4 = 261.63 Hz)
         this.notes = {
@@ -78,19 +79,55 @@ class MusicManager {
     }
 
     // Play a sequence of notes
-    async playSequence(noteSequence, bpm = 120, theme) {
+    async playSequence(noteSequence, bpm = 120, theme, sessionId, volumeMultiplier = 1) {
         const beatDuration = 60 / bpm / this.playbackRate; // In seconds
 
         for (let note of noteSequence) {
-            if (!this.isPlaying || (theme && this.currentTheme !== theme)) break;
+            if (
+                !this.isPlaying ||
+                (theme && this.currentTheme !== theme) ||
+                sessionId !== this.playbackSessionId
+            ) break;
 
             const freq = this.notes[note.pitch] || note.pitch;
             const duration = beatDuration * note.duration;
 
-            this.playNote(freq, duration, note.waveType || 'square', note.volume || 0.1);
+            this.playNote(
+                freq,
+                duration,
+                note.waveType || 'square',
+                (note.volume || 0.1) * volumeMultiplier
+            );
 
             // Wait for note to finish
             await new Promise(resolve => setTimeout(resolve, duration * 1000 / this.playbackRate));
+        }
+    }
+
+    // Wait helper that keeps playback session checks centralized.
+    async waitForSession(ms, theme, sessionId) {
+        await new Promise(resolve => setTimeout(resolve, ms));
+        return this.isPlaying && this.currentTheme === theme && sessionId === this.playbackSessionId;
+    }
+
+    // Run a single looping track layer for the active theme/session.
+    async playThemeLoop(theme, melody, bpm, sessionId, startDelayMs = 0, volumeMultiplier = 1) {
+        if (startDelayMs > 0) {
+            const stillActive = await this.waitForSession(startDelayMs, theme, sessionId);
+            if (!stillActive) return;
+        }
+
+        while (
+            this.isPlaying &&
+            this.currentTheme === theme &&
+            sessionId === this.playbackSessionId
+        ) {
+            await this.playSequence(melody, bpm, theme, sessionId, volumeMultiplier);
+            if (
+                !this.isPlaying ||
+                this.currentTheme !== theme ||
+                sessionId !== this.playbackSessionId
+            ) break;
         }
     }
 
@@ -191,6 +228,7 @@ class MusicManager {
 
     // Stop all current music
     stopAll() {
+        this.playbackSessionId++;
         this.currentOscillators.forEach(osc => {
             try {
                 osc.stop();
@@ -206,6 +244,7 @@ class MusicManager {
 
         this.ensureAudioContext(); // Resume audio context if suspended
         this.stopAll();
+        const sessionId = this.playbackSessionId;
         this.currentTheme = theme;
         this.isPlaying = true;
 
@@ -219,11 +258,28 @@ class MusicManager {
         else if (theme === 'danceParty') melody = this.dancePartyMelody();
         else return;
 
-        // Loop the melody continuously
-        while (this.isPlaying && this.currentTheme === theme) {
-            await this.playSequence(melody, bpm, theme);
-            if (!this.isPlaying || this.currentTheme !== theme) break;
+        // Woodland and Celtic intentionally use a delayed second layer for texture.
+        if (theme === 'woodland') {
+            this.playThemeLoop(theme, melody, bpm, sessionId, 0, 0.9);
+            this.playThemeLoop(theme, melody, bpm, sessionId, 5000, 0.65);
+            return;
         }
+
+        // Zen intentionally uses three layers for a deeper ambient feel.
+        if (theme === 'zen') {
+            this.playThemeLoop(theme, melody, bpm, sessionId, 0, 0.85);
+            this.playThemeLoop(theme, melody, bpm, sessionId, 3000, 0.6);
+            this.playThemeLoop(theme, melody, bpm, sessionId, 9000, 0.45);
+            return;
+        }
+
+        if (theme === 'celtic') {
+            this.playThemeLoop(theme, melody, bpm, sessionId, 0, 0.9);
+            this.playThemeLoop(theme, melody, bpm, sessionId, 5000, 0.65);
+            return;
+        }
+
+        await this.playThemeLoop(theme, melody, bpm, sessionId);
     }
 
     // Get BPM for each theme
@@ -255,13 +311,12 @@ class MusicManager {
 
     // Pause music playback
     pauseMusic() {
-        this.isPlaying = false;
+        this.stopAll();
     }
 
     // Resume music playback
     resumeMusic() {
         if (!this.isMuted) {
-            this.isPlaying = true;
             this.playTheme(this.currentTheme); // Restart the theme
         }
     }
