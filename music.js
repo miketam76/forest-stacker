@@ -226,6 +226,39 @@ class MusicManager {
         ];
     }
 
+    // Dance Party harmony layer - higher accents that answer the lead.
+    dancePartyHarmonyMelody() {
+        return [
+            { pitch: 'E5', duration: 0.5, volume: 0.16, waveType: 'triangle' },
+            { pitch: 'G5', duration: 0.5, volume: 0.16, waveType: 'triangle' },
+            { pitch: 'B5', duration: 0.5, volume: 0.16, waveType: 'triangle' },
+            { pitch: 'G5', duration: 0.5, volume: 0.16, waveType: 'triangle' },
+
+            { pitch: 'C5', duration: 1, volume: 0.16, waveType: 'triangle' },
+            { pitch: 'B5', duration: 1, volume: 0.16, waveType: 'triangle' },
+
+            { pitch: 'A5', duration: 0.5, volume: 0.16, waveType: 'triangle' },
+            { pitch: 'G5', duration: 0.5, volume: 0.16, waveType: 'triangle' },
+            { pitch: 'F5', duration: 0.5, volume: 0.16, waveType: 'triangle' },
+            { pitch: 'G5', duration: 0.5, volume: 0.16, waveType: 'triangle' },
+
+            { pitch: 'E5', duration: 2, volume: 0.16, waveType: 'triangle' }
+        ];
+    }
+
+    // Dance Party bass layer - steady pulse for groove and weight.
+    dancePartyBassMelody() {
+        return [
+            { pitch: 'C3', duration: 1, volume: 0.17, waveType: 'sawtooth' },
+            { pitch: 'C3', duration: 1, volume: 0.17, waveType: 'sawtooth' },
+            { pitch: 'A3', duration: 1, volume: 0.17, waveType: 'sawtooth' },
+            { pitch: 'A3', duration: 1, volume: 0.17, waveType: 'sawtooth' },
+            { pitch: 'F3', duration: 1, volume: 0.17, waveType: 'sawtooth' },
+            { pitch: 'G3', duration: 1, volume: 0.17, waveType: 'sawtooth' },
+            { pitch: 'C3', duration: 2, volume: 0.17, waveType: 'sawtooth' }
+        ];
+    }
+
     // Stop all current music
     stopAll() {
         this.playbackSessionId++;
@@ -276,6 +309,17 @@ class MusicManager {
         if (theme === 'celtic') {
             this.playThemeLoop(theme, melody, bpm, sessionId, 0, 0.9);
             this.playThemeLoop(theme, melody, bpm, sessionId, 5000, 0.65);
+            return;
+        }
+
+        // Dance Party gets a 3-layer club mix: lead, harmony, and bass.
+        if (theme === 'danceParty') {
+            const harmonyMelody = this.dancePartyHarmonyMelody();
+            const bassMelody = this.dancePartyBassMelody();
+
+            this.playThemeLoop(theme, melody, bpm, sessionId, 0, 0.85);
+            this.playThemeLoop(theme, harmonyMelody, bpm, sessionId, 2000, 0.55);
+            this.playThemeLoop(theme, bassMelody, bpm, sessionId, 4000, 0.45);
             return;
         }
 
