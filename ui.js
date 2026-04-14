@@ -591,7 +591,7 @@ class GameUI {
         this.pauseBtn.textContent = '⏸️';
         if (this.btnPauseMobile) this.btnPauseMobile.textContent = '⏸';
         this.gameOverOverlay.classList.remove('hidden');
-        gameStorage.saveScore(game.score);
+        gameStorage.saveScore(game.score, game.level);
         this.updateLeaderboardDisplay();
         this.updateMobileControlsVisibility();
     }
@@ -607,7 +607,7 @@ class GameUI {
         if (this.btnPauseMobile) this.btnPauseMobile.textContent = '⏸';
         if (this.gameOverOverlay) this.gameOverOverlay.classList.add('hidden');
         if (this.gameWinOverlay) this.gameWinOverlay.classList.remove('hidden');
-        gameStorage.saveScore(game.score);
+        gameStorage.saveScore(game.score, game.level);
         this.updateMobileControlsVisibility();
     }
 
@@ -627,10 +627,10 @@ class GameUI {
             const item = document.createElement('div');
             item.className = 'leaderboard-item';
             item.innerHTML = `
-                    <span class="leaderboard-rank" > #${index + 1}</span>
-                <span class="leaderboard-name">Score: </span>
-                <span class="leaderboard-score">${entry.score}</span>
-                `;
+                <span class="leaderboard-rank">#${index + 1}</span>
+                <span class="leaderboard-name">Level ${entry.level || 1}</span>
+                <span class="leaderboard-score">${entry.score} pts</span>
+            `;
             this.gameOverLeaderboardList.appendChild(item);
         });
     }

@@ -13,11 +13,12 @@ class GameStorage {
     }
 
     // Save a new score to leaderboard
-    saveScore(score) {
+    saveScore(score, level) {
         const leaderboard = this.getLeaderboard();
-        
+
         const newEntry = {
             score: score,
+            level: level || 1,
             date: new Date().toLocaleString()
         };
 
@@ -26,7 +27,7 @@ class GameStorage {
         leaderboard.splice(this.maxScores); // Keep only top 10
 
         localStorage.setItem(this.leaderboardKey, JSON.stringify(leaderboard));
-        
+
         return leaderboard;
     }
 
